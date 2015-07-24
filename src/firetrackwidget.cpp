@@ -3,7 +3,7 @@
 #include <QHBoxLayout>
 #include <QListWidget>
 #include "ftelectrodearraywidget.h"
-#include "sstimeseriesplot.h"
+#include "sstimeseriesview.h"
 
 class FireTrackWidgetPrivate {
 public:
@@ -11,7 +11,7 @@ public:
 
 	FTElectrodeArrayWidget *m_widget;
 	QListWidget *m_waveform_list;
-	SSTimeSeriesPlot *m_plot;
+	SSTimeSeriesView *m_plot;
 
 	Mda m_waveforms;
 	Mda m_locations;
@@ -30,10 +30,14 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	d->m_current_waveform_index=-1;
 
 	d->m_widget=new FTElectrodeArrayWidget;
+	connect(d->m_widget,SIGNAL(signalSelectedElectrodesChanged()),this,SLOT(slot_selected_electrodes_changed()));
+	connect(d->m_widget,SIGNAL(signalTimepointChanged()),this,SLOT(slot_timepoint_changed()));
+
+
 	d->m_waveform_list=new QListWidget; d->m_waveform_list->setFixedWidth(120);
 	connect(d->m_waveform_list,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),this,SLOT(slot_current_waveform_changed()));
 
-	d->m_plot=new SSTimeSeriesPlot;
+	d->m_plot=new SSTimeSeriesView;
 	DiskArrayModel *X=new DiskArrayModel;
 	Mda XX; XX.allocate(5,80*6);
 	for (int n=0; n<XX.N2(); n++) {
@@ -99,6 +103,32 @@ void FireTrackWidget::slot_current_waveform_changed()
 	d->set_current_waveform_index(it->data(Qt::UserRole).toInt());
 }
 
+void FireTrackWidget::slot_selected_electrodes_changed()
+{
+	QList<int> inds=d->m_widget->selectedElectrodeIndices();
+	int M=qMax(1,inds.count());
+	int T=d->m_waveforms.N2();
+	int N=1;
+	Mda X; X.allocate(M,T,N);
+	for (int m=0; m<inds.count(); m++) {
+		int ii=inds[m];
+		for (int t=0; t<T; t++) {
+			X.setValue(d->m_waveforms.value(ii,t,d->m_current_waveform_index),m,t);
+		}
+	}
+	DiskArrayModel *XX=new DiskArrayModel; XX->setFromMda(X);
+	if (d->m_plot->data()) {
+		delete d->m_plot->data();
+	}
+	d->m_plot->setData(XX);
+	d->m_plot->initialize();
+}
+
+void FireTrackWidget::slot_timepoint_changed()
+{
+	d->m_plot->setCurrentTimepoint(d->m_widget->timepoint());
+}
+
 FireTrackWidget::~FireTrackWidget()
 {
 	delete d;
@@ -120,6 +150,7 @@ void FireTrackWidgetPrivate::update_waveform_list()
 
 void FireTrackWidgetPrivate::set_current_waveform_index(int ind)
 {
+	if (m_current_waveform_index==ind) return;
 	m_current_waveform_index=ind;
 	Mda Y; Y.allocate(m_waveforms.N1(),m_waveforms.N2());
 	for (int y=0; y<m_waveforms.N2(); y++)
@@ -127,4 +158,5 @@ void FireTrackWidgetPrivate::set_current_waveform_index(int ind)
 			Y.setValue(m_waveforms.value(x,y,m_current_waveform_index),x,y);
 		}
 	m_widget->setWaveform(Y);
+	q->slot_selected_electrodes_changed();
 }

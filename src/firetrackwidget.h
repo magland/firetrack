@@ -22,6 +22,8 @@ public:
 
 private slots:
 	void slot_current_waveform_changed();
+	void slot_selected_electrodes_changed();
+	void slot_timepoint_changed();
 
 private:
 	FireTrackWidgetPrivate *d;

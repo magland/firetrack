@@ -27,8 +27,11 @@ public:
 	void stopAnimation();
 	bool isAnimating();
 
+	QList<int> selectedElectrodeIndices();
+
 signals:
 	void signalTimepointChanged();
+	void signalSelectedElectrodesChanged();
 
 protected:
 	virtual void paintEvent(QPaintEvent *evt);

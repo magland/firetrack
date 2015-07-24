@@ -26,6 +26,7 @@ FTElectrodeArrayWidget::FTElectrodeArrayWidget(QWidget *parent) : QWidget(parent
 	d->q=this;
 
 	d->m_view=new FTElectrodeArrayView;
+	connect(d->m_view,SIGNAL(signalSelectedElectrodesChanged()),this,SIGNAL(signalSelectedElectrodesChanged()));
 
 	QVBoxLayout *layout=new QVBoxLayout;
 	layout->addWidget(d->m_view);
@@ -80,6 +81,16 @@ void FTElectrodeArrayWidget::animate()
 	d->update_animate_button();
 }
 
+int FTElectrodeArrayWidget::timepoint()
+{
+	return d->m_view->timepoint();
+}
+
+QList<int> FTElectrodeArrayWidget::selectedElectrodeIndices()
+{
+	return d->m_view->selectedElectrodeIndices();
+}
+
 void FTElectrodeArrayWidget::slot_animate()
 {
 	if (!d->m_view->isAnimating()) {
@@ -110,6 +121,7 @@ void FTElectrodeArrayWidget::slot_timepoint_changed()
 	if (t0<0) d->m_timepoint_label->setText("(max)");
 	else d->m_timepoint_label->setText(QString("%1").arg(t0+1));
 	d->update_animate_button();
+	emit signalTimepointChanged();
 }
 
 void FTElectrodeArrayWidget::slot_slider_moved()

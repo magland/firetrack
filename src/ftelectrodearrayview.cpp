@@ -25,9 +25,11 @@ public:
 	QList<QPointF> m_electrode_pixel_locations;
 	int m_hovered_index;
 	QSet<int> m_selected_indices;
+	int m_colorbar_width;
 
 	QPointF ind2pix(int i);
 	QColor fire_color_map(float pct);
+	QColor color_map(float pct);
 	int find_electrode_index_at(QPointF pt);
 	float get_electrode_pixel_radius();
 };
@@ -46,6 +48,8 @@ FTElectrodeArrayView::FTElectrodeArrayView(QWidget *parent) : QWidget(parent)
 
 	d->m_pixel_spacing_x=10;
 	d->m_pixel_spacing_y=10;
+
+	d->m_colorbar_width=20;
 
 	d->m_hovered_index=-1;
 
@@ -111,7 +115,7 @@ void FTElectrodeArrayView::setWaveform(const Mda &X)
 				maxind=t;
 			}
 		}
-		d->m_waveform_absmax_vals.setValue(maxval,m,0);
+		d->m_waveform_absmax_vals.setValue(d->m_waveform.value(m,maxind),m,0);
 		d->m_waveform_absmax_inds.setValue(maxind,m,0);
 		if (maxval>d->m_waveform_absmax) d->m_waveform_absmax=maxval;
 	}
@@ -164,6 +168,39 @@ bool FTElectrodeArrayView::isAnimating()
 	return ((d->m_animate_timepoint>=0)&&(!d->m_animation_paused));
 }
 
+struct electrod_sort_struct {
+	float x,y;
+	int ind;
+};
+
+struct Comparer
+{
+	bool operator()(const electrod_sort_struct & a, const electrod_sort_struct & b) const {
+		if (a.y<b.y) return true;
+		if (a.y>b.y) return false;
+		if (a.x<b.x) return true;
+		return false;
+	}
+};
+
+
+QList<int> FTElectrodeArrayView::selectedElectrodeIndices()
+{
+	QList<electrod_sort_struct> list;
+	foreach (int ind,d->m_selected_indices) {
+		electrod_sort_struct aa;
+		aa.x=d->m_electrode_locations.value(ind,0);
+		aa.y=d->m_electrode_locations.value(ind,1);
+		aa.ind=ind;
+		list.append(aa);
+	}
+	qSort(list.begin(),list.end(),Comparer());
+
+	QList<int> ret;
+	for (int i=0; i<list.count(); i++) ret << list[i].ind;
+	return ret;
+}
+
 void FTElectrodeArrayView::paintEvent(QPaintEvent *evt)
 {
 	Q_UNUSED(evt);
@@ -181,8 +218,9 @@ void FTElectrodeArrayView::paintEvent(QPaintEvent *evt)
 		else
 			val=(d->m_waveform.value(i,d->m_timepoint))/absmax;
 
-		QColor col=d->fire_color_map(1-(1-val)*(1-val)*(1-val));
-		col=QColor(255-col.red(),255-col.green(),255-col.blue());
+		if (val>0) val=1-pow((1-val),2);
+		else val=-(1-pow(1+val,2));
+		QColor col=d->color_map(val);
 		QPointF pt=d->ind2pix(i);
 		d->m_electrode_pixel_locations << pt;
 		painter.setBrush(QBrush(col));
@@ -199,6 +237,13 @@ void FTElectrodeArrayView::paintEvent(QPaintEvent *evt)
 		}
 		painter.setPen(QPen(QBrush(pen_color),pen_width));
 		painter.drawEllipse(pt,spacing,spacing);
+	}
+
+	int HH=height()-40;
+	for (int y=0; y<HH; y++) {
+		QColor col=d->color_map((y-HH/2)*1.0/(HH/2));
+		painter.setPen(col);
+		painter.drawLine(width()-d->m_colorbar_width,HH+20-y,width(),HH+20-y);
 	}
 }
 
@@ -221,6 +266,7 @@ void FTElectrodeArrayView::mousePressEvent(QMouseEvent *evt)
 		else {
 			d->m_selected_indices.insert(ind);
 		}
+		emit signalSelectedElectrodesChanged();
 		update();
 	}
 }
@@ -265,7 +311,7 @@ QPointF FTElectrodeArrayViewPrivate::ind2pix(int i)
 	float width0=maxx-minx+2*spacing;
 	float height0=maxy-miny+2*spacing;
 
-	float factorx=q->width()/width0;
+	float factorx=(q->width()-m_colorbar_width)/width0;
 	float factory=q->height()/height0;
 	float factor0=qMin(factorx,factory);
 
@@ -281,10 +327,27 @@ QPointF FTElectrodeArrayViewPrivate::ind2pix(int i)
 	return QPointF(x1,y1);
 }
 
+QColor FTElectrodeArrayViewPrivate::color_map(float pct) {
+	float r,g,b;
+	if (pct>0) {
+		b=1;
+		r=1-pct;
+		g=1-pct*pct;
+	}
+	else {
+		pct=-pct;
+		r=1;
+		g=1-pct;
+		b=1-pct*pct;
+	}
+	return QColor((int)qMin(255.0F,255*r),(int)qMin(255.0F,255*g),(int)qMin(255.0F,255*b));
+}
+
 QColor FTElectrodeArrayViewPrivate::fire_color_map(float pct)
 {
+	bool neg=(pct<0);
+	pct=qAbs(pct);
 	if (pct>1) pct=1;
-	if (pct<0) pct=0;
 	float r=0,g=0,b=0;
 
 	if (pct<0.5) r=pct/0.5*255;
@@ -298,7 +361,12 @@ QColor FTElectrodeArrayViewPrivate::fire_color_map(float pct)
 	else if (pct<0.8) b=0;
 	else b=255-(1-pct)/0.2*255;
 
-	return QColor((int)r,(int)g,(int)b);
+	if (neg) {
+		return QColor((int)g,(int)r,(int)b);
+	}
+	else {
+		return QColor((int)r,(int)g,(int)b);
+	}
 }
 
 int FTElectrodeArrayViewPrivate::find_electrode_index_at(QPointF pt)

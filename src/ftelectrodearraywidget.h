@@ -19,6 +19,13 @@ public:
 
 	void animate();
 
+	int timepoint();
+	QList<int> selectedElectrodeIndices();
+
+signals:
+	void signalSelectedElectrodesChanged();
+	void signalTimepointChanged();
+
 private slots:
 	void slot_animate();
 	void slot_pause();
