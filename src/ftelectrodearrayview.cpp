@@ -283,7 +283,7 @@ void FTElectrodeArrayView::paintEvent(QPaintEvent *evt)
 
 void FTElectrodeArrayView::mouseMoveEvent(QMouseEvent *evt)
 {
-	int ind=d->find_electrode_index_at(evt->posF());
+	int ind=d->find_electrode_index_at(evt->pos());
 	if (ind!=d->m_hovered_index) {
 		d->m_hovered_index=ind;
 		update();
@@ -292,7 +292,7 @@ void FTElectrodeArrayView::mouseMoveEvent(QMouseEvent *evt)
 
 void FTElectrodeArrayView::mousePressEvent(QMouseEvent *evt)
 {
-	int ind=d->find_electrode_index_at(evt->posF());
+	int ind=d->find_electrode_index_at(evt->pos());
 	if (ind>=0) {
 		if (evt->button()==Qt::RightButton) {
 			if (d->m_selected_indices.contains(ind)) {
