@@ -32,7 +32,7 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	d->m_widget=new FTElectrodeArrayWidget;
 	connect(d->m_widget,SIGNAL(signalSelectedElectrodesChanged()),this,SLOT(slot_selected_electrodes_changed()));
 	connect(d->m_widget,SIGNAL(signalTimepointChanged()),this,SLOT(slot_timepoint_changed()));
-	connect(d->m_widget,SIGNAL(signalElectrodeLeftClicked(int)),this,SLOT(slot_electrode_right_clicked(int)));
+	connect(d->m_widget,SIGNAL(signalElectrodeLeftClicked(int)),this,SLOT(slot_electrode_left_clicked(int)));
 
 
 	d->m_waveform_list=new QListWidget; d->m_waveform_list->setFixedWidth(120);
@@ -152,7 +152,7 @@ void FireTrackWidget::slot_plot_timepoint_changed()
 	d->m_widget->setTimepoint(d->m_plot->currentTimepoint());
 }
 
-void FireTrackWidget::slot_electrode_right_clicked(int ind)
+void FireTrackWidget::slot_electrode_left_clicked(int ind)
 {
 	float best_val=0;
 	float best_val_ind=0;
@@ -170,6 +170,12 @@ void FireTrackWidget::slot_electrode_right_clicked(int ind)
 		}
 	}
 	d->set_current_waveform_index(best_val_ind);
+	for (int i=0; i<d->m_waveform_list->count(); i++) {
+		QListWidgetItem *it=d->m_waveform_list->item(i);
+		if (it->data(Qt::UserRole).toInt()==best_val_ind) {
+			d->m_waveform_list->setCurrentItem(it);
+		}
+	}
 }
 
 FireTrackWidget::~FireTrackWidget()

@@ -26,7 +26,7 @@ private slots:
 	void slot_selected_electrodes_changed();
 	void slot_timepoint_changed();
 	void slot_plot_timepoint_changed();
-	void slot_electrode_right_clicked(int ind);
+	void slot_electrode_left_clicked(int ind);
 
 private:
 	FireTrackWidgetPrivate *d;
