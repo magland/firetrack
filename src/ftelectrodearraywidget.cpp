@@ -27,7 +27,7 @@ FTElectrodeArrayWidget::FTElectrodeArrayWidget(QWidget *parent) : QWidget(parent
 
 	d->m_view=new FTElectrodeArrayView;
 	connect(d->m_view,SIGNAL(signalSelectedElectrodesChanged()),this,SIGNAL(signalSelectedElectrodesChanged()));
-	connect(d->m_view,SIGNAL(signalElectrodeRightClicked(int)),this,SIGNAL(signalElectrodeRightClicked(int)));
+	connect(d->m_view,SIGNAL(signalElectrodeLeftClicked(int)),this,SIGNAL(signalElectrodeLeftClicked(int)));
 
 	QVBoxLayout *layout=new QVBoxLayout;
 	layout->addWidget(d->m_view);

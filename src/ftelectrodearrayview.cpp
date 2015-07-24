@@ -294,7 +294,7 @@ void FTElectrodeArrayView::mousePressEvent(QMouseEvent *evt)
 {
 	int ind=d->find_electrode_index_at(evt->posF());
 	if (ind>=0) {
-		if (evt->button()==Qt::LeftButton) {
+		if (evt->button()==Qt::RightButton) {
 			if (d->m_selected_indices.contains(ind)) {
 				d->m_selected_indices.remove(ind);
 			}
@@ -304,8 +304,8 @@ void FTElectrodeArrayView::mousePressEvent(QMouseEvent *evt)
 			emit signalSelectedElectrodesChanged();
 			update();
 		}
-		else if (evt->button()==Qt::RightButton) {
-			emit signalElectrodeRightClicked(ind);
+		else if (evt->button()==Qt::LeftButton) {
+			emit signalElectrodeLeftClicked(ind);
 		}
 	}
 }

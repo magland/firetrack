@@ -31,7 +31,7 @@ protected:
 signals:
 	void signalSelectedElectrodesChanged();
 	void signalTimepointChanged();
-	void signalElectrodeRightClicked(int);
+	void signalElectrodeLeftClicked(int);
 
 private slots:
 	void slot_animate();

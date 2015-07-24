@@ -32,7 +32,7 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	d->m_widget=new FTElectrodeArrayWidget;
 	connect(d->m_widget,SIGNAL(signalSelectedElectrodesChanged()),this,SLOT(slot_selected_electrodes_changed()));
 	connect(d->m_widget,SIGNAL(signalTimepointChanged()),this,SLOT(slot_timepoint_changed()));
-	connect(d->m_widget,SIGNAL(signalElectrodeRightClicked(int)),this,SLOT(slot_electrode_right_clicked(int)));
+	connect(d->m_widget,SIGNAL(signalElectrodeLeftClicked(int)),this,SLOT(slot_electrode_right_clicked(int)));
 
 
 	d->m_waveform_list=new QListWidget; d->m_waveform_list->setFixedWidth(120);

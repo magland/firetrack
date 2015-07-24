@@ -34,7 +34,7 @@ public:
 signals:
 	void signalTimepointChanged();
 	void signalSelectedElectrodesChanged();
-	void signalElectrodeRightClicked(int);
+	void signalElectrodeLeftClicked(int);
 
 protected:
 	virtual void paintEvent(QPaintEvent *evt);
