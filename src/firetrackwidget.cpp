@@ -32,6 +32,7 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	d->m_widget=new FTElectrodeArrayWidget;
 	connect(d->m_widget,SIGNAL(signalSelectedElectrodesChanged()),this,SLOT(slot_selected_electrodes_changed()));
 	connect(d->m_widget,SIGNAL(signalTimepointChanged()),this,SLOT(slot_timepoint_changed()));
+	connect(d->m_widget,SIGNAL(signalElectrodeRightClicked(int)),this,SLOT(slot_electrode_right_clicked(int)));
 
 
 	d->m_waveform_list=new QListWidget; d->m_waveform_list->setFixedWidth(120);
@@ -46,9 +47,12 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 		}
 	}
 	X->setFromMda(XX);
+	int tmp_timepoint=d->m_plot->currentTimepoint();
 	d->m_plot->setData(X);
 	d->m_plot->initialize();
 	d->m_plot->setFixedWidth(250);
+	d->m_plot->setCurrentTimepoint(tmp_timepoint);
+	connect(d->m_plot,SIGNAL(currentXChanged()),this,SLOT(slot_plot_timepoint_changed()));
 
 	QWidget *CW=new QWidget;
 	QHBoxLayout *CL=new QHBoxLayout;
@@ -70,6 +74,18 @@ void FireTrackWidget::setWaveforms(const Mda &X)
 {
 	d->m_waveforms=X;
 	d->update_waveform_list();
+
+	//set a bunch of selected electrodes, which will then be reset to those with maximal peaks
+	QList<int> dummy;
+	int num=X.N1();
+	if (num>20) num=8;
+	for (int i=0; i<num; i++) {
+		if (i<X.N1()) {
+			dummy << i;
+		}
+	}
+	d->m_widget->setSelectedElectrodeIndices(dummy);
+
 	d->set_current_waveform_index(0);
 }
 
@@ -120,13 +136,40 @@ void FireTrackWidget::slot_selected_electrodes_changed()
 	if (d->m_plot->data()) {
 		delete d->m_plot->data();
 	}
+	int tmp_timepoint=d->m_plot->currentTimepoint();
 	d->m_plot->setData(XX);
 	d->m_plot->initialize();
+	d->m_plot->setCurrentTimepoint(tmp_timepoint);
 }
 
 void FireTrackWidget::slot_timepoint_changed()
 {
 	d->m_plot->setCurrentTimepoint(d->m_widget->timepoint());
+}
+
+void FireTrackWidget::slot_plot_timepoint_changed()
+{
+	d->m_widget->setTimepoint(d->m_plot->currentTimepoint());
+}
+
+void FireTrackWidget::slot_electrode_right_clicked(int ind)
+{
+	float best_val=0;
+	float best_val_ind=0;
+	for (int i=0; i<d->m_waveforms.N3(); i++) {
+		float max_t_val=0;
+		for (int t=0; t<d->m_waveforms.N2(); t++) {
+			float tmp=qAbs(d->m_waveforms.value(ind,t,i));
+			if (tmp>max_t_val) {
+				max_t_val=tmp;
+			}
+		}
+		if (max_t_val>best_val) {
+			best_val=max_t_val;
+			best_val_ind=i;
+		}
+	}
+	d->set_current_waveform_index(best_val_ind);
 }
 
 FireTrackWidget::~FireTrackWidget()

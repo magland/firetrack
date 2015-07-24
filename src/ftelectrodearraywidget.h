@@ -1,6 +1,7 @@
 #ifndef FTELECTRODEARRAYWIDGET_H
 #define FTELECTRODEARRAYWIDGET_H
 
+#include <QWheelEvent>
 #include <QWidget>
 #include "diskreadmda.h"
 #include "mda.h"
@@ -20,11 +21,17 @@ public:
 	void animate();
 
 	int timepoint();
+	void setTimepoint(int t);
 	QList<int> selectedElectrodeIndices();
+	void setSelectedElectrodeIndices(const QList<int> &X);
+
+protected:
+	void wheelEvent(QWheelEvent *evt);
 
 signals:
 	void signalSelectedElectrodesChanged();
 	void signalTimepointChanged();
+	void signalElectrodeRightClicked(int);
 
 private slots:
 	void slot_animate();

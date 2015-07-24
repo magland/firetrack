@@ -17,6 +17,7 @@ public:
 
 	void setElectrodeLocations(const Mda &L);
 	void setWaveform(const Mda &X);
+	Mda *waveform();
 
 	int timepoint();
 	void setTimepoint(int val);
@@ -28,10 +29,12 @@ public:
 	bool isAnimating();
 
 	QList<int> selectedElectrodeIndices();
+	void setSelectedElectrodeIndices(const QList<int> &X);
 
 signals:
 	void signalTimepointChanged();
 	void signalSelectedElectrodesChanged();
+	void signalElectrodeRightClicked(int);
 
 protected:
 	virtual void paintEvent(QPaintEvent *evt);

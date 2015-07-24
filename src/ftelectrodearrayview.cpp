@@ -49,7 +49,7 @@ FTElectrodeArrayView::FTElectrodeArrayView(QWidget *parent) : QWidget(parent)
 	d->m_pixel_spacing_x=10;
 	d->m_pixel_spacing_y=10;
 
-	d->m_colorbar_width=20;
+	d->m_colorbar_width=6;
 
 	d->m_hovered_index=-1;
 
@@ -97,6 +97,21 @@ void FTElectrodeArrayView::setElectrodeLocations(const Mda &L)
 	this->update();
 }
 
+struct electrod_sort_struct {
+	float x,y;
+	int ind;
+};
+
+struct electrode_sort_comparer
+{
+	bool operator()(const electrod_sort_struct & a, const electrod_sort_struct & b) const {
+		if (a.y<b.y) return true;
+		if (a.y>b.y) return false;
+		if (a.x<b.x) return true;
+		return false;
+	}
+};
+
 void FTElectrodeArrayView::setWaveform(const Mda &X)
 {
 	d->m_waveform=X;
@@ -119,7 +134,31 @@ void FTElectrodeArrayView::setWaveform(const Mda &X)
 		d->m_waveform_absmax_inds.setValue(maxind,m,0);
 		if (maxval>d->m_waveform_absmax) d->m_waveform_absmax=maxval;
 	}
+
+	int ct=d->m_selected_indices.count();
+	d->m_selected_indices.clear();
+	M=d->m_waveform_absmax_vals.N1();
+	QList<electrod_sort_struct> list;
+	for (int i=0; i<M; i++) {
+		electrod_sort_struct tmp0;
+		tmp0.ind=i;
+		tmp0.x=0;
+		tmp0.y=qAbs(d->m_waveform_absmax_vals.value(i,0));
+		list << tmp0;
+	}
+	qSort(list.begin(),list.end(),electrode_sort_comparer());
+	for (int i=0; i<ct; i++) {
+		if (i<list.count()) {
+			d->m_selected_indices.insert(list[list.count()-1-i].ind);
+		}
+	}
+
 	this->update();
+}
+
+Mda *FTElectrodeArrayView::waveform()
+{
+	return &d->m_waveform;
 }
 
 int FTElectrodeArrayView::timepoint()
@@ -130,7 +169,6 @@ int FTElectrodeArrayView::timepoint()
 void FTElectrodeArrayView::setTimepoint(int val)
 {
 	if (d->m_timepoint!=val) {
-		d->m_animate_timepoint=val;
 		d->m_timepoint=val;
 		update(); repaint();
 		emit signalTimepointChanged();
@@ -168,22 +206,6 @@ bool FTElectrodeArrayView::isAnimating()
 	return ((d->m_animate_timepoint>=0)&&(!d->m_animation_paused));
 }
 
-struct electrod_sort_struct {
-	float x,y;
-	int ind;
-};
-
-struct Comparer
-{
-	bool operator()(const electrod_sort_struct & a, const electrod_sort_struct & b) const {
-		if (a.y<b.y) return true;
-		if (a.y>b.y) return false;
-		if (a.x<b.x) return true;
-		return false;
-	}
-};
-
-
 QList<int> FTElectrodeArrayView::selectedElectrodeIndices()
 {
 	QList<electrod_sort_struct> list;
@@ -194,11 +216,17 @@ QList<int> FTElectrodeArrayView::selectedElectrodeIndices()
 		aa.ind=ind;
 		list.append(aa);
 	}
-	qSort(list.begin(),list.end(),Comparer());
+	qSort(list.begin(),list.end(),electrode_sort_comparer());
 
 	QList<int> ret;
 	for (int i=0; i<list.count(); i++) ret << list[i].ind;
 	return ret;
+}
+
+void FTElectrodeArrayView::setSelectedElectrodeIndices(const QList<int> &X)
+{
+	d->m_selected_indices=QSet<int>::fromList(X);
+	update();
 }
 
 void FTElectrodeArrayView::paintEvent(QPaintEvent *evt)
@@ -211,6 +239,8 @@ void FTElectrodeArrayView::paintEvent(QPaintEvent *evt)
 	float absmax=d->m_waveform_absmax; if (absmax==0) absmax=1;
 	int M=d->m_electrode_locations.N1();
 	d->m_electrode_pixel_locations.clear();
+	double miny=9999;
+	double maxy=-9999;
 	for (int i=0; i<M; i++) {
 		float val=0;
 		if (d->m_timepoint<0)
@@ -232,18 +262,22 @@ void FTElectrodeArrayView::paintEvent(QPaintEvent *evt)
 			pen_width=3;
 		}
 		if (d->m_selected_indices.contains(i)) {
-			pen_color=Qt::red;
+			pen_color=Qt::darkGreen;
 			pen_width=qMax(pen_width,2);
 		}
 		painter.setPen(QPen(QBrush(pen_color),pen_width));
 		painter.drawEllipse(pt,spacing,spacing);
+		miny=qMin(miny,pt.y()-spacing);
+		maxy=qMax(maxy,pt.y()+spacing);
 	}
 
-	int HH=height()-40;
-	for (int y=0; y<HH; y++) {
-		QColor col=d->color_map((y-HH/2)*1.0/(HH/2));
+	int y1=(int)miny;
+	int y2=(int)maxy;
+	for (int y=y1; y<=y2; y++) {
+		float pct=-(y-(y1+y2)/2)*2.0/(y1+y2);
+		QColor col=d->color_map(pct);
 		painter.setPen(col);
-		painter.drawLine(width()-d->m_colorbar_width,HH+20-y,width(),HH+20-y);
+		painter.drawLine(width()-d->m_colorbar_width-d->m_pixel_spacing_x/2,y,width()-d->m_pixel_spacing_x/2,y);
 	}
 }
 
@@ -260,14 +294,19 @@ void FTElectrodeArrayView::mousePressEvent(QMouseEvent *evt)
 {
 	int ind=d->find_electrode_index_at(evt->posF());
 	if (ind>=0) {
-		if (d->m_selected_indices.contains(ind)) {
-			d->m_selected_indices.remove(ind);
+		if (evt->button()==Qt::LeftButton) {
+			if (d->m_selected_indices.contains(ind)) {
+				d->m_selected_indices.remove(ind);
+			}
+			else {
+				d->m_selected_indices.insert(ind);
+			}
+			emit signalSelectedElectrodesChanged();
+			update();
 		}
-		else {
-			d->m_selected_indices.insert(ind);
+		else if (evt->button()==Qt::RightButton) {
+			emit signalElectrodeRightClicked(ind);
 		}
-		emit signalSelectedElectrodesChanged();
-		update();
 	}
 }
 
@@ -330,12 +369,14 @@ QPointF FTElectrodeArrayViewPrivate::ind2pix(int i)
 QColor FTElectrodeArrayViewPrivate::color_map(float pct) {
 	float r,g,b;
 	if (pct>0) {
+		pct=qMin(1.0F,pct);
 		b=1;
 		r=1-pct;
 		g=1-pct*pct;
 	}
 	else {
 		pct=-pct;
+		pct=qMin(1.0F,pct);
 		r=1;
 		g=1-pct;
 		b=1-pct*pct;
@@ -376,7 +417,7 @@ int FTElectrodeArrayViewPrivate::find_electrode_index_at(QPointF pt)
 	for (int i=0; i<m_electrode_pixel_locations.count(); i++) {
 		QPointF diff=pt-m_electrode_pixel_locations[i];
 		float dist=sqrt(diff.x()*diff.x()+diff.y()*diff.y());
-		if (dist<=spacing+1) ret=i;
+		if (dist<=spacing*1.5) ret=i;
 	}
 	return ret;
 }

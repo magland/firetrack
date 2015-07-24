@@ -3,6 +3,9 @@
 #include <QDebug>
 #include <qdatetime.h>
 #include "ftcontroller.h"
+#include <QFile>
+#include <QMessageBox>
+#include <QProcess>
 #include <QStringList>
 #include "textfile.h"
 #include "usagetracking.h"
@@ -13,6 +16,20 @@
  * TO DO:
  * Clean up temporary files
  * */
+
+bool download_file(QString url,QString fname) {
+	QStringList args; args << "-o" << fname << url;
+	int ret=QProcess::execute("/usr/bin/curl",args);
+	qDebug() << args;
+	qDebug() << "return value" << ret;
+	if (ret!=0) {
+		if (QFile::exists(fname)) {
+			QFile::remove(fname);
+		}
+		return false;
+	}
+	return QFile::exists(fname);
+}
 
 
 int main(int argc, char *argv[]) {
@@ -73,11 +90,24 @@ int main(int argc, char *argv[]) {
 		script=read_text_file(script_path);
 	} else {
 		if (waveforms_path.isEmpty()) {
-			waveforms_path="/home/magland/matlab/scda_ss/jfm/core/scratch/test_all_channels/waveforms_first_5e5_points.mda";
+			waveforms_path=a.applicationDirPath()+"/../testdata/waveforms_first_5e5_points.mda";
+			if (!QFile::exists(waveforms_path)) {
+				QMessageBox::StandardButton reply=
+				QMessageBox::question(0,"Start download?","Test data must be downloaded. Start download?",QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
+				if (reply==QMessageBox::No) exit(0);
+				QMessageBox::information(0,"Downloading","Please wait while file is downloaded. Click OK to start download.");
+				QString url="http://97.107.129.125/waveforms_first_5e5_points.mda";
+				if (!download_file(url,waveforms_path)) {
+					QMessageBox::information(0,"Error Downloading","There was a problem downloading the file "+url+". Is curl installed? Exiting.");
+					exit(0);
+				}
+				QMessageBox::information(0,"File downloaded","It appears that the file was downloaded properly. Press OK to continue.");
+			}
 		}
 		if (locations_path.isEmpty()) {
-			locations_path="/home/magland/matlab/scda_ss/jfm/core/scratch/test_all_channels/locations.mda";
+			locations_path=a.applicationDirPath()+"/../testdata/locations.mda";
 		}
+		qDebug() << waveforms_path << locations_path;
 		script="";
 		script+=QString("var V%1=FIRETRACK.createFireTrackerWidget();\n").arg(0);
 		script+=QString("var X%1=FIRETRACK.readArray('%2');\n").arg(0).arg(waveforms_path);

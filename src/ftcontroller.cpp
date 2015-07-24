@@ -57,7 +57,7 @@ QWidget *FTController::createFireTrackerWidget()
 	FireTrackWidget *W=new FireTrackWidget();
 	W->setAttribute(Qt::WA_DeleteOnClose);
 	W->showNormal();
-	W->resize(1000,500);
+	W->resize(1300,500);
 	W->move(300,300);
 	return W;
 }

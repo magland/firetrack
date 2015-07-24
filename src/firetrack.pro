@@ -18,9 +18,9 @@ SOURCES += firetrackmain.cpp ftcontroller.cpp \
     ftelectrodearraywidget.cpp \
     firetrackwidget.cpp
 
-INCLUDEPATH += ../../spikespy/src
-DEPENDPATH += ../../spikespy/src
-VPATH += ../../spikespy/src
+INCLUDEPATH += spikespy
+DEPENDPATH += spikespy
+VPATH += spikespy
 
 SOURCES += \
     sstimeseriesplot.cpp \

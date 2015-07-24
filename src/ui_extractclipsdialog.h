@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'extractclipsdialog.ui'
 **
-** Created: Fri Jul 24 08:35:01 2015
+** Created: Fri Jul 24 12:27:53 2015
 **      by: Qt User Interface Compiler version 4.8.4
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

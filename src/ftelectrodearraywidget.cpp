@@ -27,6 +27,7 @@ FTElectrodeArrayWidget::FTElectrodeArrayWidget(QWidget *parent) : QWidget(parent
 
 	d->m_view=new FTElectrodeArrayView;
 	connect(d->m_view,SIGNAL(signalSelectedElectrodesChanged()),this,SIGNAL(signalSelectedElectrodesChanged()));
+	connect(d->m_view,SIGNAL(signalElectrodeRightClicked(int)),this,SIGNAL(signalElectrodeRightClicked(int)));
 
 	QVBoxLayout *layout=new QVBoxLayout;
 	layout->addWidget(d->m_view);
@@ -86,9 +87,31 @@ int FTElectrodeArrayWidget::timepoint()
 	return d->m_view->timepoint();
 }
 
+void FTElectrodeArrayWidget::setTimepoint(int t)
+{
+	d->m_view->setTimepoint(t);
+	d->m_slider->setValue(t);
+}
+
 QList<int> FTElectrodeArrayWidget::selectedElectrodeIndices()
 {
 	return d->m_view->selectedElectrodeIndices();
+}
+
+void FTElectrodeArrayWidget::setSelectedElectrodeIndices(const QList<int> &X)
+{
+	d->m_view->setSelectedElectrodeIndices(X);
+}
+
+void FTElectrodeArrayWidget::wheelEvent(QWheelEvent *evt)
+{
+	if (d->m_view->timepoint()<0) {
+		d->m_view->setTimepoint(d->m_view->waveform()->N2()/2);
+		return;
+	}
+	int dd=1;
+	if (evt->delta()<0) dd=-1;
+	d->m_view->setTimepoint(d->m_view->timepoint()+dd);
 }
 
 void FTElectrodeArrayWidget::slot_animate()
