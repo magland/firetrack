@@ -91,7 +91,7 @@ void PlotAreaPrivate::do_refresh(QPainter *P) {
 	P->fillRect(qMin(PP0.x,PP1.x),qMin(PP0.y,PP1.y), qAbs(PP0.x-PP1.x), qAbs(PP0.y-PP1.y),QBrush(QColor(0,0,0,0)));
 	*/
 
-	m_left_panel_width=qMax(10,qMin(20,m_plot_rect.width()/100));
+	m_left_panel_width=qMax(40,qMin(20,m_plot_rect.width()/100));
 
 	//left panel
 	for (int ss=0; ss<m_series.count(); ss++) {
@@ -99,7 +99,7 @@ void PlotAreaPrivate::do_refresh(QPainter *P) {
 		Vec2 pix=q->coordToPix(vec2(0,SS->offset));
 		QRect RR(0,pix.y-30,m_left_panel_width,60);
 		P->setPen(QPen(QColor(150,150,255)));
-		P->setFont(QFont("Arial",qMin(m_left_panel_width-1,12)));
+		P->setFont(QFont("Arial",qMin(m_left_panel_width-1,9)));
 		P->drawText(RR,Qt::AlignCenter|Qt::AlignVCenter,SS->name);
 	}
 

@@ -7,15 +7,18 @@
 #include <QSlider>
 #include <QTimer>
 #include <QLabel>
+#include "ftoptionswidget.h"
+#include "fthelpwidget.h"
 
 class FTElectrodeArrayWidgetPrivate {
 public:
 	FTElectrodeArrayWidget *q;
-
 	FTElectrodeArrayView *m_view;
 	QSlider *m_slider;
 	QPushButton *m_animate_button;
 	QLabel *m_timepoint_label;
+	FTOptionsWidget *m_options_widget;
+	FTHelpWidget *m_help_widget;
 
 	void update_animate_button();
 };
@@ -24,6 +27,13 @@ FTElectrodeArrayWidget::FTElectrodeArrayWidget(QWidget *parent) : QWidget(parent
 {
 	d=new FTElectrodeArrayWidgetPrivate;
 	d->q=this;
+
+	d->m_options_widget=new FTOptionsWidget(0);
+	d->m_options_widget->setWindowFlags(Qt::WindowStaysOnTopHint);
+	connect(d->m_options_widget,SIGNAL(signalOptionsChanged()),this,SLOT(slot_options_changed()));
+
+	d->m_help_widget=new FTHelpWidget(0);
+	d->m_help_widget->setWindowFlags(Qt::WindowStaysOnTopHint);
 
 	d->m_view=new FTElectrodeArrayView;
 	connect(d->m_view,SIGNAL(signalSelectedElectrodesChanged()),this,SIGNAL(signalSelectedElectrodesChanged()));
@@ -55,6 +65,16 @@ FTElectrodeArrayWidget::FTElectrodeArrayWidget(QWidget *parent) : QWidget(parent
 	}
 	button_layout->addWidget(d->m_slider);
 	button_layout->addWidget(d->m_timepoint_label);
+	{
+		QPushButton *B0=new QPushButton("Options...");
+		connect(B0,SIGNAL(clicked()),this,SLOT(slot_options()));
+		button_layout->addWidget(B0);
+	}
+	{
+		QPushButton *B0=new QPushButton("Help...");
+		connect(B0,SIGNAL(clicked()),this,SLOT(slot_help()));
+		button_layout->addWidget(B0);
+	}
 	button_layout->addStretch();
 	layout->addLayout(button_layout);
 
@@ -159,8 +179,36 @@ void FTElectrodeArrayWidget::slot_slider_action_triggered()
 	QTimer::singleShot(10,this,SLOT(slot_slider_moved())); //this is necessary because value has not yet been set
 }
 
+void FTElectrodeArrayWidget::slot_options()
+{
+	if (!d->m_options_widget->isVisible()) {
+		d->m_options_widget->resize(300,300);
+		d->m_options_widget->move(this->topLevelWidget()->pos().x()+50,this->topLevelWidget()->pos().y()+50);
+	}
+	d->m_options_widget->show();
+	d->m_options_widget->raise();
+}
+
+void FTElectrodeArrayWidget::slot_help()
+{
+	if (!d->m_help_widget->isVisible()) {
+		d->m_help_widget->resize(600,300);
+		d->m_help_widget->move(this->topLevelWidget()->pos().x()+this->topLevelWidget()->width()-50-d->m_help_widget->width(),this->topLevelWidget()->pos().y()+50);
+	}
+	d->m_help_widget->show();
+	d->m_help_widget->raise();
+}
+
+void FTElectrodeArrayWidget::slot_options_changed()
+{
+	d->m_view->setShowChannelNumbers(d->m_options_widget->showChannelNumbers());
+	d->m_view->setAutoSelectChannels(d->m_options_widget->autoSelectChannels());
+}
+
 FTElectrodeArrayWidget::~FTElectrodeArrayWidget()
 {
+	delete d->m_options_widget;
+	delete d->m_help_widget;
 	delete d;
 }
 

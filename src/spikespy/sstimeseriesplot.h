@@ -28,6 +28,8 @@ public:
 
 	DiskArrayModel *data();
 
+	void setChannelLabels(const QStringList &labels);
+
 
 	void setData(SSARRAY *data);
 	void setLabels(SSLabelsModel1 *L,bool is_owner=false);

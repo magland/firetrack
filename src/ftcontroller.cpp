@@ -52,12 +52,13 @@ QObject *FTController::readArray(QString path)
 	return ret;
 }
 
-QWidget *FTController::createFireTrackerWidget()
+QWidget *FTController::createFireTrackWidget()
 {
 	FireTrackWidget *W=new FireTrackWidget();
 	W->setAttribute(Qt::WA_DeleteOnClose);
 	W->showNormal();
 	W->resize(1300,500);
 	W->move(300,300);
+	W->setWindowTitle("FireTrack");
 	return W;
 }

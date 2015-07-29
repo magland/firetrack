@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 		}
 		qDebug() << waveforms_path << locations_path;
 		script="";
-		script+=QString("var V%1=FIRETRACK.createFireTrackerWidget();\n").arg(0);
+		script+=QString("var V%1=FIRETRACK.createFireTrackWidget();\n").arg(0);
 		script+=QString("var X%1=FIRETRACK.readArray('%2');\n").arg(0).arg(waveforms_path);
 		script+=QString("var L%1=FIRETRACK.readArray('%2');\n").arg(0).arg(locations_path);
 		script+=QString("V%1.setWaveforms(X%1);\n").arg(0);

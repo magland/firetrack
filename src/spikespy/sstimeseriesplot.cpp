@@ -27,6 +27,7 @@ public:
 	QList<double> m_plot_y1;
 	QList<double> m_plot_y2;
 	QList<QColor> m_channel_colors;
+	QStringList m_channel_labels;
 	QList<QColor> m_label_colors;
 	QPixmap m_image;
 	bool m_image_needs_update;
@@ -164,6 +165,11 @@ void SSTimeSeriesPlot::initialize()
 DiskArrayModel *SSTimeSeriesPlot::data()
 {
 	return d->m_data;
+}
+
+void SSTimeSeriesPlot::setChannelLabels(const QStringList &labels)
+{
+	d->m_channel_labels=labels;
 }
 
 void SSTimeSeriesPlotPrivate::set_data2() {
@@ -327,7 +333,9 @@ void SSTimeSeriesPlotPrivate::setup_plot_area() {
 			PlotSeries SS;
 			SS.xvals=xvals; SS.yvals=yvals; SS.color=color; SS.offset=m_plot_offsets[ch];
 			SS.plot_pairs=false;
-			SS.name=QString("%1").arg(ch+1);
+			QString label0=m_channel_labels.value(ch);
+			if (label0.isEmpty()) label0=QString("%1").arg(ch+1);
+			SS.name=label0;
 			m_plot_area.addSeries(SS);
 		}
 		else {

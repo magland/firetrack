@@ -17,6 +17,9 @@ public:
 	Mda m_locations;
 	int m_current_waveform_index;
 
+	int m_left_clicked_current_index;
+	QSet<int> m_left_clicked_current_index_viewed_waveform_indices;
+
 	void update_waveform_list();
 	void set_current_waveform_index(int ind);
 };
@@ -28,6 +31,8 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	d->q=this;
 
 	d->m_current_waveform_index=-1;
+
+	d->m_left_clicked_current_index=-1;
 
 	d->m_widget=new FTElectrodeArrayWidget;
 	connect(d->m_widget,SIGNAL(signalSelectedElectrodesChanged()),this,SLOT(slot_selected_electrodes_changed()));
@@ -78,7 +83,7 @@ void FireTrackWidget::setWaveforms(const Mda &X)
 	//set a bunch of selected electrodes, which will then be reset to those with maximal peaks
 	QList<int> dummy;
 	int num=X.N1();
-	if (num>20) num=8;
+	if (num>20) num=10;
 	for (int i=0; i<num; i++) {
 		if (i<X.N1()) {
 			dummy << i;
@@ -112,6 +117,22 @@ void FireTrackWidget::setElectrodeLocations(DiskReadMda *X)
 	setElectrodeLocations(Y);
 }
 
+void FireTrackWidget::resizeEvent(QResizeEvent *evt)
+{
+	{
+		float W0=this->width()*0.15;
+		W0=qMax(W0,80.0F);
+		W0=qMin(W0,300.0F);
+		d->m_waveform_list->setFixedWidth(W0);
+	}
+	{
+		float W0=this->width()*0.2;
+		W0=qMax(W0,150.0F);
+		W0=qMin(W0,350.0F);
+		d->m_plot->setFixedWidth(W0);
+	}
+}
+
 void FireTrackWidget::slot_current_waveform_changed()
 {
 	QListWidgetItem *it=d->m_waveform_list->currentItem();
@@ -126,17 +147,20 @@ void FireTrackWidget::slot_selected_electrodes_changed()
 	int T=d->m_waveforms.N2();
 	int N=1;
 	Mda X; X.allocate(M,T,N);
+	QStringList channel_labels;
 	for (int m=0; m<inds.count(); m++) {
 		int ii=inds[m];
 		for (int t=0; t<T; t++) {
 			X.setValue(d->m_waveforms.value(ii,t,d->m_current_waveform_index),m,t);
 		}
+		channel_labels << QString("%1").arg(inds[m]+1);
 	}
 	DiskArrayModel *XX=new DiskArrayModel; XX->setFromMda(X);
 	if (d->m_plot->data()) {
 		delete d->m_plot->data();
 	}
 	int tmp_timepoint=d->m_plot->currentTimepoint();
+	d->m_plot->setChannelLabels(channel_labels);
 	d->m_plot->setData(XX);
 	d->m_plot->initialize();
 	d->m_plot->setCurrentTimepoint(tmp_timepoint);
@@ -154,21 +178,29 @@ void FireTrackWidget::slot_plot_timepoint_changed()
 
 void FireTrackWidget::slot_electrode_left_clicked(int ind)
 {
+
+	if (ind!=d->m_left_clicked_current_index) {
+		d->m_left_clicked_current_index_viewed_waveform_indices.clear();
+	}
+
 	float best_val=0;
 	float best_val_ind=0;
 	for (int i=0; i<d->m_waveforms.N3(); i++) {
-		float max_t_val=0;
-		for (int t=0; t<d->m_waveforms.N2(); t++) {
-			float tmp=qAbs(d->m_waveforms.value(ind,t,i));
-			if (tmp>max_t_val) {
-				max_t_val=tmp;
+		if (!d->m_left_clicked_current_index_viewed_waveform_indices.contains(i)) {
+			float max_t_val=0;
+			for (int t=0; t<d->m_waveforms.N2(); t++) {
+				float tmp=qAbs(d->m_waveforms.value(ind,t,i));
+				if (tmp>max_t_val) {
+					max_t_val=tmp;
+				}
+			}
+			if (max_t_val>best_val) {
+				best_val=max_t_val;
+				best_val_ind=i;
 			}
 		}
-		if (max_t_val>best_val) {
-			best_val=max_t_val;
-			best_val_ind=i;
-		}
 	}
+	d->m_left_clicked_current_index_viewed_waveform_indices.insert(best_val_ind);
 	d->set_current_waveform_index(best_val_ind);
 	for (int i=0; i<d->m_waveform_list->count(); i++) {
 		QListWidgetItem *it=d->m_waveform_list->item(i);
@@ -176,6 +208,8 @@ void FireTrackWidget::slot_electrode_left_clicked(int ind)
 			d->m_waveform_list->setCurrentItem(it);
 		}
 	}
+
+	d->m_left_clicked_current_index=ind;
 }
 
 FireTrackWidget::~FireTrackWidget()

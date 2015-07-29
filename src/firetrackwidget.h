@@ -21,6 +21,9 @@ public:
 	Q_INVOKABLE void setWaveforms(DiskReadMda *X);
 	Q_INVOKABLE void setElectrodeLocations(DiskReadMda *X);
 
+protected:
+	void resizeEvent(QResizeEvent *evt);
+
 private slots:
 	void slot_current_waveform_changed();
 	void slot_selected_electrodes_changed();

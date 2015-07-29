@@ -28,6 +28,9 @@ public:
 	void stopAnimation();
 	bool isAnimating();
 
+	void setShowChannelNumbers(bool val);
+	void setAutoSelectChannels(bool val);
+
 	QList<int> selectedElectrodeIndices();
 	void setSelectedElectrodeIndices(const QList<int> &X);
 

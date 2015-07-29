@@ -7,6 +7,7 @@
 #include <QDebug>
 #include "sslabelsmodel1.h"
 #include <math.h>
+#include <QStringList>
 
 class SSTimeSeriesViewPrivate {
 public:
@@ -123,6 +124,11 @@ void SSTimeSeriesView::setClipMode(bool val)
 bool SSTimeSeriesView::clipMode()
 {
 	return d->m_clip_mode;
+}
+
+void SSTimeSeriesView::setChannelLabels(const QStringList &labels)
+{
+	d->m_plot->setChannelLabels(labels);
 }
 
 SSLabelsModel *SSTimeSeriesView::getLabels()

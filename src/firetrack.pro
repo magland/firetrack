@@ -12,11 +12,15 @@ TEMPLATE = app
 HEADERS += ftcontroller.h \
     ftelectrodearrayview.h \
     ftelectrodearraywidget.h \
-    firetrackwidget.h
+    firetrackwidget.h \
+    ftoptionswidget.h \
+    fthelpwidget.h
 SOURCES += firetrackmain.cpp ftcontroller.cpp \
     ftelectrodearrayview.cpp \
     ftelectrodearraywidget.cpp \
-    firetrackwidget.cpp
+    firetrackwidget.cpp \
+    ftoptionswidget.cpp \
+    fthelpwidget.cpp
 
 INCLUDEPATH += spikespy
 DEPENDPATH += spikespy

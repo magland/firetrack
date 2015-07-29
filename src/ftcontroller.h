@@ -15,7 +15,7 @@ public:
 	Q_INVOKABLE QObject *loadArray(QString path);
 	Q_INVOKABLE QObject *readArray(QString path);
 
-	Q_INVOKABLE QWidget *createFireTrackerWidget();
+	Q_INVOKABLE QWidget *createFireTrackWidget();
 };
 
 

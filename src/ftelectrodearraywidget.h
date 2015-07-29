@@ -40,6 +40,9 @@ private slots:
 	void slot_timepoint_changed();
 	void slot_slider_moved();
 	void slot_slider_action_triggered();
+	void slot_options();
+	void slot_help();
+	void slot_options_changed();
 
 private:
 	FTElectrodeArrayWidgetPrivate *d;

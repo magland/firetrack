@@ -24,6 +24,8 @@ public:
 	Q_INVOKABLE void setClipMode(bool val);
 	bool clipMode();
 
+	void setChannelLabels(const QStringList &labels);
+
 	SSLabelsModel *getLabels();
 
 	float currentValue();
