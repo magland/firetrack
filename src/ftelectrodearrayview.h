@@ -24,12 +24,15 @@ public:
 
 	void animate();
 	void pauseAnimation();
-	void rewindAnimation();
 	void stopAnimation();
 	bool isAnimating();
 
 	void setShowChannelNumbers(bool val);
 	void setAutoSelectChannels(bool val);
+
+	void setGlobalAbsMax(float val);
+	void setNormalizeIntensity(bool val);
+	void setBrightness(float val);
 
 	QList<int> selectedElectrodeIndices();
 	void setSelectedElectrodeIndices(const QList<int> &X);

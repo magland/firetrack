@@ -27,7 +27,7 @@ SSAbstractPlot::SSAbstractPlot(QWidget *parent) : QWidget(parent)
 	d->m_xrange_max=0;
 	d->m_yrange_min=0;
 	d->m_yrange_max=0;
-	d->m_vertical_zoom_factor=1;
+	d->m_vertical_zoom_factor=1.5; //changed on 7/29/15
 	d->m_channel_flip=true;
 }
 

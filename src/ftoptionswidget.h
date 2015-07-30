@@ -16,6 +16,8 @@ public:
 
 	bool showChannelNumbers();
 	bool autoSelectChannels();
+	bool normalizeIntensity();
+	float brightness();
 
 private:
 	FTOptionsWidgetPrivate *d;

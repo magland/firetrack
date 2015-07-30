@@ -17,6 +17,7 @@ public:
 
 	void setElectrodeLocations(const Mda &L);
 	void setWaveform(const Mda &X);
+	void setGlobalAbsMax(float val);
 
 	void animate();
 
@@ -24,6 +25,10 @@ public:
 	void setTimepoint(int t);
 	QList<int> selectedElectrodeIndices();
 	void setSelectedElectrodeIndices(const QList<int> &X);
+
+	void setBrightness(float val);
+
+	QWidget *optionsWidget();
 
 protected:
 	void wheelEvent(QWheelEvent *evt);
@@ -36,11 +41,9 @@ signals:
 private slots:
 	void slot_animate();
 	void slot_pause();
-	void slot_rewind();
 	void slot_timepoint_changed();
 	void slot_slider_moved();
 	void slot_slider_action_triggered();
-	void slot_options();
 	void slot_help();
 	void slot_options_changed();
 

@@ -1,7 +1,9 @@
 QT += core gui
 QT += script
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+CONFIG -= app_bundle #Please apple, don't make a bundle today
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets #We do want to support Qt5, but there is no reason not to use Qt4
 
 DESTDIR = ../bin
 OBJECTS_DIR = ../build
@@ -14,17 +16,19 @@ HEADERS += ftcontroller.h \
     ftelectrodearraywidget.h \
     firetrackwidget.h \
     ftoptionswidget.h \
-    fthelpwidget.h
+    fthelpwidget.h \
+    ftplotoptions.h
 SOURCES += firetrackmain.cpp ftcontroller.cpp \
     ftelectrodearrayview.cpp \
     ftelectrodearraywidget.cpp \
     firetrackwidget.cpp \
     ftoptionswidget.cpp \
-    fthelpwidget.cpp
+    fthelpwidget.cpp \
+    ftplotoptions.cpp
 
 INCLUDEPATH += spikespy
-DEPENDPATH += spikespy
-VPATH += spikespy
+DEPENDPATH += spikespy #This DEPENDPATH is for Qt4
+VPATH += spikespy #This VPATH is for Qt5
 
 SOURCES += \
     sstimeseriesplot.cpp \

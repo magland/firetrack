@@ -58,20 +58,10 @@ FTElectrodeArrayWidget::FTElectrodeArrayWidget(QWidget *parent) : QWidget(parent
 		button_layout->addWidget(B0);
 		d->m_animate_button=B0;
 	}
-	{
-		QPushButton *B0=new QPushButton("Rewind");
-		connect(B0,SIGNAL(clicked()),this,SLOT(slot_rewind()));
-		button_layout->addWidget(B0);
-	}
 	button_layout->addWidget(d->m_slider);
 	button_layout->addWidget(d->m_timepoint_label);
 	{
-		QPushButton *B0=new QPushButton("Options...");
-		connect(B0,SIGNAL(clicked()),this,SLOT(slot_options()));
-		button_layout->addWidget(B0);
-	}
-	{
-		QPushButton *B0=new QPushButton("Help...");
+		QPushButton *B0=new QPushButton("Show Help");
 		connect(B0,SIGNAL(clicked()),this,SLOT(slot_help()));
 		button_layout->addWidget(B0);
 	}
@@ -89,6 +79,11 @@ void FTElectrodeArrayWidget::setWaveform(const Mda &X)
 	d->m_slider->setRange(-1,X.N2()-1);
 	d->m_slider->setValue(-1);
 	d->m_view->setTimepoint(-1);
+}
+
+void FTElectrodeArrayWidget::setGlobalAbsMax(float val)
+{
+	d->m_view->setGlobalAbsMax(val);
 }
 
 void FTElectrodeArrayWidget::setElectrodeLocations(const Mda &X)
@@ -123,6 +118,16 @@ void FTElectrodeArrayWidget::setSelectedElectrodeIndices(const QList<int> &X)
 	d->m_view->setSelectedElectrodeIndices(X);
 }
 
+void FTElectrodeArrayWidget::setBrightness(float val)
+{
+	d->m_view->setBrightness(val);
+}
+
+QWidget *FTElectrodeArrayWidget::optionsWidget()
+{
+	return d->m_options_widget;
+}
+
 void FTElectrodeArrayWidget::wheelEvent(QWheelEvent *evt)
 {
 	if (d->m_view->timepoint()<0) {
@@ -152,11 +157,6 @@ void FTElectrodeArrayWidget::slot_pause()
 	d->update_animate_button();
 }
 
-void FTElectrodeArrayWidget::slot_rewind()
-{
-	d->m_view->rewindAnimation();
-}
-
 void FTElectrodeArrayWidget::slot_timepoint_changed()
 {
 	int t0=d->m_view->timepoint();
@@ -179,20 +179,10 @@ void FTElectrodeArrayWidget::slot_slider_action_triggered()
 	QTimer::singleShot(10,this,SLOT(slot_slider_moved())); //this is necessary because value has not yet been set
 }
 
-void FTElectrodeArrayWidget::slot_options()
-{
-	if (!d->m_options_widget->isVisible()) {
-		d->m_options_widget->resize(300,300);
-		d->m_options_widget->move(this->topLevelWidget()->pos().x()+50,this->topLevelWidget()->pos().y()+50);
-	}
-	d->m_options_widget->show();
-	d->m_options_widget->raise();
-}
-
 void FTElectrodeArrayWidget::slot_help()
 {
 	if (!d->m_help_widget->isVisible()) {
-		d->m_help_widget->resize(600,300);
+		d->m_help_widget->resize(600,600);
 		d->m_help_widget->move(this->topLevelWidget()->pos().x()+this->topLevelWidget()->width()-50-d->m_help_widget->width(),this->topLevelWidget()->pos().y()+50);
 	}
 	d->m_help_widget->show();
@@ -203,6 +193,8 @@ void FTElectrodeArrayWidget::slot_options_changed()
 {
 	d->m_view->setShowChannelNumbers(d->m_options_widget->showChannelNumbers());
 	d->m_view->setAutoSelectChannels(d->m_options_widget->autoSelectChannels());
+	d->m_view->setNormalizeIntensity(d->m_options_widget->normalizeIntensity());
+	d->m_view->setBrightness(d->m_options_widget->brightness());
 }
 
 FTElectrodeArrayWidget::~FTElectrodeArrayWidget()

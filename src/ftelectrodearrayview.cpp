@@ -13,7 +13,9 @@ public:
 	Mda m_waveform;
 	Mda m_waveform_absmax_vals;
 	Mda m_waveform_absmax_inds;
+	bool m_normalize_intensity;
 	float m_waveform_absmax;
+	float m_global_absmax;
 	Mda m_electrode_locations;
 	float m_min_electrode_spacing;
 	float m_electrode_minx,m_electrode_maxx;
@@ -28,6 +30,7 @@ public:
 	int m_colorbar_width;
 	bool m_show_channel_numbers;
 	bool m_auto_select_channels;
+	float m_brightness;
 
 	QPointF ind2pix(int i);
 	QColor fire_color_map(float pct);
@@ -43,6 +46,8 @@ FTElectrodeArrayView::FTElectrodeArrayView(QWidget *parent) : QWidget(parent)
 	d->q=this;
 
 	d->m_waveform_absmax=1;
+	d->m_global_absmax=0;
+	d->m_normalize_intensity=true;
 
 	d->m_min_electrode_spacing=1;
 	d->m_electrode_minx=0; d->m_electrode_maxx=1;
@@ -57,6 +62,8 @@ FTElectrodeArrayView::FTElectrodeArrayView(QWidget *parent) : QWidget(parent)
 
 	d->m_show_channel_numbers=true;
 	d->m_auto_select_channels=true;
+
+	d->m_brightness=0;
 
 	QPalette pal=this->palette();
 	int tmp=(int)(255*0.8);
@@ -193,15 +200,6 @@ void FTElectrodeArrayView::pauseAnimation()
 	d->m_animation_paused=true;
 }
 
-void FTElectrodeArrayView::rewindAnimation()
-{
-	if (d->m_animate_timepoint>=0) {
-		d->m_animate_timepoint=0;
-		d->m_timepoint=d->m_animate_timepoint;
-		update(); repaint();
-		emit signalTimepointChanged();
-	}
-}
 
 void FTElectrodeArrayView::stopAnimation()
 {
@@ -215,13 +213,36 @@ bool FTElectrodeArrayView::isAnimating()
 
 void FTElectrodeArrayView::setShowChannelNumbers(bool val)
 {
-	d->m_show_channel_numbers=val;
-	this->update();
+	if (d->m_show_channel_numbers!=val) {
+		d->m_show_channel_numbers=val;
+		this->update();
+	}
 }
 
 void FTElectrodeArrayView::setAutoSelectChannels(bool val)
 {
 	d->m_auto_select_channels=val;
+}
+
+void FTElectrodeArrayView::setGlobalAbsMax(float val)
+{
+	d->m_global_absmax=val;
+}
+
+void FTElectrodeArrayView::setNormalizeIntensity(bool val)
+{
+	if (d->m_normalize_intensity!=val) {
+		d->m_normalize_intensity=val;
+		this->update();
+	}
+}
+
+void FTElectrodeArrayView::setBrightness(float val)
+{
+	if (d->m_brightness!=val) {
+		d->m_brightness=val;
+		update();
+	}
 }
 
 QList<int> FTElectrodeArrayView::selectedElectrodeIndices()
@@ -256,7 +277,10 @@ void FTElectrodeArrayView::paintEvent(QPaintEvent *evt)
 
 	d->ind2pix(0); //to set d->m_pixel_spacing_*
 	float spacing=d->get_electrode_pixel_radius();
-	float absmax=d->m_waveform_absmax; if (absmax==0) absmax=1;
+	float absmax=0;
+	if (d->m_normalize_intensity) absmax=d->m_waveform_absmax;
+	else absmax=d->m_global_absmax;
+	if (absmax==0) absmax=1;
 	int M=d->m_electrode_locations.N1();
 	d->m_electrode_pixel_locations.clear();
 	double miny=9999;
@@ -270,7 +294,8 @@ void FTElectrodeArrayView::paintEvent(QPaintEvent *evt)
 
 		if (val>0) val=1-pow((1-val),2);
 		else val=-(1-pow(1+val,2));
-		QColor col=d->color_map(val);
+		float brightness_factor=exp(d->m_brightness/100*3);
+		QColor col=d->color_map(val*brightness_factor);
 		QPointF pt=d->ind2pix(i);
 		d->m_electrode_pixel_locations << pt;
 		painter.setBrush(QBrush(col));

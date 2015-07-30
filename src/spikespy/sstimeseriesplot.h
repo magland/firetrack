@@ -29,6 +29,8 @@ public:
 	DiskArrayModel *data();
 
 	void setChannelLabels(const QStringList &labels);
+	void setUniformVerticalChannelSpacing(bool val);
+	bool uniformVerticalChannelSpacing();
 
 
 	void setData(SSARRAY *data);

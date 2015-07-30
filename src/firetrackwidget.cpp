@@ -4,6 +4,7 @@
 #include <QListWidget>
 #include "ftelectrodearraywidget.h"
 #include "sstimeseriesview.h"
+#include "ftplotoptions.h"
 
 class FireTrackWidgetPrivate {
 public:
@@ -12,6 +13,7 @@ public:
 	FTElectrodeArrayWidget *m_widget;
 	QListWidget *m_waveform_list;
 	SSTimeSeriesView *m_plot;
+	FTPlotOptions *m_plot_options;
 
 	Mda m_waveforms;
 	Mda m_locations;
@@ -44,6 +46,7 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	connect(d->m_waveform_list,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),this,SLOT(slot_current_waveform_changed()));
 
 	d->m_plot=new SSTimeSeriesView;
+	d->m_plot->setVerticalZoomFactor(1);
 	DiskArrayModel *X=new DiskArrayModel;
 	Mda XX; XX.allocate(5,80*6);
 	for (int n=0; n<XX.N2(); n++) {
@@ -59,13 +62,31 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	d->m_plot->setCurrentTimepoint(tmp_timepoint);
 	connect(d->m_plot,SIGNAL(currentXChanged()),this,SLOT(slot_plot_timepoint_changed()));
 
+	d->m_plot_options=new FTPlotOptions;
+	connect(d->m_plot_options,SIGNAL(signalOptionsChanged()),this,SLOT(slot_plot_options_changed()));
+	connect(d->m_plot_options,SIGNAL(signalVerticalScaling(float)),this,SLOT(slot_plot_vertical_scaling(float)));
+
+	QHBoxLayout *HL=new QHBoxLayout;
+	HL->addWidget(d->m_waveform_list);
+	HL->addWidget(d->m_widget);
+	HL->addWidget(d->m_plot);
+
+	QWidget *bottom_widget=new QWidget;
+	bottom_widget->setFixedHeight(150);
+	QHBoxLayout *L1=new QHBoxLayout;
+	L1->addWidget(d->m_widget->optionsWidget());
+	L1->addWidget(d->m_plot_options);
+	L1->addSpacerItem(new QSpacerItem(0,0,QSizePolicy::Expanding));
+	bottom_widget->setLayout(L1);
+
 	QWidget *CW=new QWidget;
-	QHBoxLayout *CL=new QHBoxLayout;
+	QVBoxLayout *CL=new QVBoxLayout;
+	CL->addLayout(HL);
+	CL->addWidget(bottom_widget);
 	CW->setLayout(CL);
-	CL->addWidget(d->m_waveform_list);
-	CL->addWidget(d->m_widget);
-	CL->addWidget(d->m_plot);
 	this->setCentralWidget(CW);
+
+
 	qDebug() << "Testing";
 }
 
@@ -90,6 +111,15 @@ void FireTrackWidget::setWaveforms(const Mda &X)
 		}
 	}
 	d->m_widget->setSelectedElectrodeIndices(dummy);
+
+	float absmax=0;
+	for (int n=0; n<X.N3(); n++)
+		for (int t=0; t<X.N2(); t++)
+			for (int m=0; m<X.N1(); m++) {
+				float val=qAbs(X.value(m,t,n));
+				if (val>absmax) absmax=val;
+			}
+	d->m_widget->setGlobalAbsMax(absmax);
 
 	d->set_current_waveform_index(0);
 }
@@ -119,6 +149,7 @@ void FireTrackWidget::setElectrodeLocations(DiskReadMda *X)
 
 void FireTrackWidget::resizeEvent(QResizeEvent *evt)
 {
+	Q_UNUSED(evt);
 	{
 		float W0=this->width()*0.15;
 		W0=qMax(W0,80.0F);
@@ -212,6 +243,16 @@ void FireTrackWidget::slot_electrode_left_clicked(int ind)
 	d->m_left_clicked_current_index=ind;
 }
 
+void FireTrackWidget::slot_plot_options_changed()
+{
+	d->m_plot->setUniformVerticalChannelSpacing(d->m_plot_options->uniformVerticalChannelSpacing());
+}
+
+void FireTrackWidget::slot_plot_vertical_scaling(float val)
+{
+	d->m_plot->setVerticalZoomFactor(d->m_plot->verticalZoomFactor()*val);
+}
+
 FireTrackWidget::~FireTrackWidget()
 {
 	delete d;
@@ -225,7 +266,7 @@ void FireTrackWidgetPrivate::update_waveform_list()
 	int N=m_waveforms.N3();
 	for (int i=0; i<N; i++) {
 		QListWidgetItem *it=new QListWidgetItem();
-		it->setText(QString("WF %1").arg(i+1));
+		it->setText(QString("Neuron %1").arg(i+1));
 		it->setData(Qt::UserRole,i);
 		m_waveform_list->addItem(it);
 	}

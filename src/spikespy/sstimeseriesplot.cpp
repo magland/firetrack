@@ -34,6 +34,7 @@ public:
 	//QMap<int,Mda *> m_multiscale_min_arrays;
 	//QMap<int,Mda *> m_multiscale_max_arrays;
 	int m_margins[4];
+	bool m_uniform_vertical_channel_spacing;
   
 	void set_data2();
 	QColor get_channel_color(int num);
@@ -52,6 +53,8 @@ SSTimeSeriesPlot::SSTimeSeriesPlot(QWidget *parent) : SSAbstractPlot(parent) {
 
 	d->m_max_timepoint=0;
 	d->m_num_channels=1;
+
+	d->m_uniform_vertical_channel_spacing=true;
 
 	QList<QString> color_strings;
 
@@ -127,8 +130,6 @@ void SSTimeSeriesPlot::paintPlot(QPaintEvent *event) {
 	}
 
 	painter.drawPixmap(0,0,d->m_image);
-
-
 }
 
 void SSTimeSeriesPlot::setData(SSARRAY *data) {
@@ -170,6 +171,18 @@ DiskArrayModel *SSTimeSeriesPlot::data()
 void SSTimeSeriesPlot::setChannelLabels(const QStringList &labels)
 {
 	d->m_channel_labels=labels;
+}
+
+void SSTimeSeriesPlot::setUniformVerticalChannelSpacing(bool val)
+{
+	qDebug() << "setUniformVerticalChannelSpacing" << val;
+	d->m_uniform_vertical_channel_spacing=val;
+	this->slot_replot_needed();
+}
+
+bool SSTimeSeriesPlot::uniformVerticalChannelSpacing()
+{
+	return d->m_uniform_vertical_channel_spacing;
 }
 
 void SSTimeSeriesPlotPrivate::set_data2() {
@@ -262,6 +275,21 @@ void SSTimeSeriesPlotPrivate::setup_plot_area() {
 		}
 		if (qAbs(m_plot_maxvals[ch]) > max00) {
 			max00 = qAbs(m_plot_maxvals[ch]);
+		}
+	}
+
+	if (m_uniform_vertical_channel_spacing) {
+		if (m_plot_minvals.count()>0) {
+			float global_plot_minval=m_plot_minvals[0];
+			float global_plot_maxval=m_plot_maxvals[0];
+			for (int i=0; i<m_plot_minvals.count(); i++) {
+				if (m_plot_minvals[i]<global_plot_minval) global_plot_minval=m_plot_minvals[i];
+				if (m_plot_maxvals[i]>global_plot_maxval) global_plot_maxval=m_plot_maxvals[i];
+			}
+			for (int i=0; i<m_plot_minvals.count(); i++) {
+				m_plot_minvals[i]=global_plot_minval;
+				m_plot_maxvals[i]=global_plot_maxval;
+			}
 		}
 	}
 

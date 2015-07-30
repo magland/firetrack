@@ -80,6 +80,10 @@ void SSTimeSeriesView::keyPressEvent(QKeyEvent *evt)
 			}
 		}
 	}
+	else if (evt->key()==Qt::Key_V) {
+		d->m_plot->setUniformVerticalChannelSpacing(!d->m_plot->uniformVerticalChannelSpacing());
+		return;
+	}
 	SSAbstractView::keyPressEvent(evt);
 }
 
@@ -129,6 +133,11 @@ bool SSTimeSeriesView::clipMode()
 void SSTimeSeriesView::setChannelLabels(const QStringList &labels)
 {
 	d->m_plot->setChannelLabels(labels);
+}
+
+void SSTimeSeriesView::setUniformVerticalChannelSpacing(bool val)
+{
+	d->m_plot->setUniformVerticalChannelSpacing(val);
 }
 
 SSLabelsModel *SSTimeSeriesView::getLabels()
