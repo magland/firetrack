@@ -46,7 +46,7 @@ FTPlotOptions::FTPlotOptions(QWidget *parent) : QWidget(parent)
 	}
     {
         QHBoxLayout *LL=new QHBoxLayout;
-        LL->addWidget(new QLabel("Animation speed:"));
+        LL->addWidget(new QLabel("Animation speed (Hz):"));
         QSpinBox *SB=new QSpinBox;
         SB->setRange(1,20000);
         SB->setValue(10);

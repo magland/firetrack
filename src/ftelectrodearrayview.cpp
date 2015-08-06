@@ -62,7 +62,7 @@ FTElectrodeArrayView::FTElectrodeArrayView(QWidget *parent) : QWidget(parent)
 
 	d->m_hovered_index=-1;
 
-	d->m_show_channel_numbers=true;
+    d->m_show_channel_numbers=false;
 	d->m_auto_select_channels=true;
 
 	d->m_brightness=0;
@@ -392,7 +392,8 @@ void FTElectrodeArrayView::slot_timer()
 			emit signalTimepointChanged();
 		}
         msec=msec_incr-elapsed+1;
-		if (d->m_animate_timepoint>=T) {
+        if (msec<=0) msec=1;
+        if ((d->m_animate_timepoint>=T)||(msec_incr==0)) {
 			d->m_animate_timepoint=-1;
 			d->m_timepoint=-1;
 			emit signalTimepointChanged();

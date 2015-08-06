@@ -1,9 +1,14 @@
 #!/bin/bash
 
 
-function main_function() {
+function main_function {
+    testmode=$1
     check_compiled;
-    do_run_firetrack "first_1e3_points_filtered.mda";
+    if [ "$testmode" == "B" ]; then
+        do_run_firetrack "waveforms_first_5e5_points.mda";
+    else
+        do_run_firetrack "first_1e3_points_filtered.mda";
+    fi
 }
 
 function do_run_firetrack {
@@ -43,5 +48,6 @@ function do_download {
     curl http://97.107.129.125/$fname -o testdata/$fname
 }
 
-main_function;
+testmode=$1
+main_function $testmode
 

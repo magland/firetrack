@@ -88,7 +88,7 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	this->setCentralWidget(CW);
 
 
-	qDebug() << "Testing";
+    d->m_widget->animate();
 }
 
 void FireTrackWidget::setElectrodeLocations(const Mda &L)
@@ -106,6 +106,7 @@ void FireTrackWidget::setWaveforms(const Mda &X)
 	QList<int> dummy;
 	int num=X.N1();
 	if (num>20) num=10;
+    if (X.N3()<=1) num=0; //because in this case we are probably viewing the raw data
 	for (int i=0; i<num; i++) {
 		if (i<X.N1()) {
 			dummy << i;
