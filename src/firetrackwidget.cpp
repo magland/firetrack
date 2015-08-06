@@ -65,6 +65,7 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	d->m_plot_options=new FTPlotOptions;
 	connect(d->m_plot_options,SIGNAL(signalOptionsChanged()),this,SLOT(slot_plot_options_changed()));
 	connect(d->m_plot_options,SIGNAL(signalVerticalScaling(float)),this,SLOT(slot_plot_vertical_scaling(float)));
+    d->m_widget->setAnimationSpeed(d->m_plot_options->animationSpeed());
 
 	QHBoxLayout *HL=new QHBoxLayout;
 	HL->addWidget(d->m_waveform_list);
@@ -246,6 +247,7 @@ void FireTrackWidget::slot_electrode_left_clicked(int ind)
 void FireTrackWidget::slot_plot_options_changed()
 {
 	d->m_plot->setUniformVerticalChannelSpacing(d->m_plot_options->uniformVerticalChannelSpacing());
+    d->m_widget->setAnimationSpeed(d->m_plot_options->animationSpeed());
 }
 
 void FireTrackWidget::slot_plot_vertical_scaling(float val)

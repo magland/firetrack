@@ -10,6 +10,7 @@ class FTPlotOptionsPrivate {
 public:
 	FTPlotOptions *q;
 	QCheckBox *m_uniform_vertical_spacing;
+    QSpinBox *m_animation_speed;
 };
 
 
@@ -43,6 +44,19 @@ FTPlotOptions::FTPlotOptions(QWidget *parent) : QWidget(parent)
 		connect(Bplus,SIGNAL(clicked()),this,SLOT(slot_vertical_scaling_plus()));
 		row++;
 	}
+    {
+        QHBoxLayout *LL=new QHBoxLayout;
+        LL->addWidget(new QLabel("Animation speed:"));
+        QSpinBox *SB=new QSpinBox;
+        SB->setRange(1,20000);
+        SB->setValue(10);
+        LL->addWidget(SB);
+        LL->addSpacerItem(new QSpacerItem(0,0,QSizePolicy::Expanding));
+        layout->addLayout(LL,row,0);
+        connect(SB,SIGNAL(valueChanged(int)),this,SIGNAL(signalOptionsChanged()));
+        d->m_animation_speed=SB;
+        row++;
+    }
 
 	QSpacerItem *SI=new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 	layout->addItem(SI,row,0);
@@ -66,6 +80,11 @@ void FTPlotOptions::slot_vertical_scaling_plus()
 
 bool FTPlotOptions::uniformVerticalChannelSpacing()
 {
-	return d->m_uniform_vertical_spacing->isChecked();
+    return d->m_uniform_vertical_spacing->isChecked();
+}
+
+float FTPlotOptions::animationSpeed()
+{
+    return d->m_animation_speed->value();
 }
 

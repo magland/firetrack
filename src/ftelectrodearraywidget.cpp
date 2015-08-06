@@ -94,7 +94,12 @@ void FTElectrodeArrayWidget::setElectrodeLocations(const Mda &X)
 void FTElectrodeArrayWidget::animate()
 {
 	d->m_view->animate();
-	d->update_animate_button();
+    d->update_animate_button();
+}
+
+void FTElectrodeArrayWidget::setAnimationSpeed(float hz)
+{
+    d->m_view->setAnimationSpeed(hz);
 }
 
 int FTElectrodeArrayWidget::timepoint()

@@ -20,6 +20,7 @@ public:
 	void setGlobalAbsMax(float val);
 
 	void animate();
+    void setAnimationSpeed(float hz);
 
 	int timepoint();
 	void setTimepoint(int t);

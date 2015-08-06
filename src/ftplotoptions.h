@@ -14,6 +14,7 @@ public:
 	explicit FTPlotOptions(QWidget *parent = 0);
 
 	bool uniformVerticalChannelSpacing();
+    float animationSpeed();
 
 private:
 	FTPlotOptionsPrivate *d;

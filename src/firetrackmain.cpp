@@ -90,7 +90,8 @@ int main(int argc, char *argv[]) {
 		script=read_text_file(script_path);
 	} else {
 		if (waveforms_path.isEmpty()) {
-			waveforms_path=a.applicationDirPath()+"/../testdata/waveforms_first_5e5_points.mda";
+
+            waveforms_path=a.applicationDirPath()+"/../testdata/waveforms_first_5e5_points.mda";
 			if (!QFile::exists(waveforms_path)) {
 				QMessageBox::StandardButton reply=
 				QMessageBox::question(0,"Start download?","Test data must be downloaded. Start download?",QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
@@ -103,6 +104,8 @@ int main(int argc, char *argv[]) {
 				}
 				QMessageBox::information(0,"File downloaded","It appears that the file was downloaded properly. Press OK to continue.");
 			}
+
+            //waveforms_path="/home/magland/gazelle_backup/current/matlab/scda_ss/jfm/core/scratch/test_all_channels/first_1e3_points_filtered.mda";
 		}
 		if (locations_path.isEmpty()) {
 			locations_path=a.applicationDirPath()+"/../testdata/locations.mda";

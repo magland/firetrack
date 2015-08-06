@@ -31,6 +31,8 @@ public:
 	bool m_show_channel_numbers;
 	bool m_auto_select_channels;
 	float m_brightness;
+    float m_animation_speed;
+    QDateTime m_time_of_last_animation;
 
 	QPointF ind2pix(int i);
 	QColor fire_color_map(float pct);
@@ -65,6 +67,8 @@ FTElectrodeArrayView::FTElectrodeArrayView(QWidget *parent) : QWidget(parent)
 
 	d->m_brightness=0;
 
+    d->m_animation_speed=4;
+
 	QPalette pal=this->palette();
 	int tmp=(int)(255*0.8);
 	pal.setColor(QPalette::Background, QColor(tmp,tmp,tmp));
@@ -72,7 +76,7 @@ FTElectrodeArrayView::FTElectrodeArrayView(QWidget *parent) : QWidget(parent)
 
 	d->m_timepoint=-1;
 	d->m_animate_timepoint=-1;
-	d->m_animation_paused=false;
+    d->m_animation_paused=true;
 
 	this->setMouseTracking(true);
 
@@ -192,6 +196,7 @@ void FTElectrodeArrayView::setTimepoint(int val)
 void FTElectrodeArrayView::animate()
 {
 	d->m_animation_paused=false;
+    d->m_time_of_last_animation=QDateTime::currentDateTime();
 	if (d->m_animate_timepoint<0) d->m_animate_timepoint=0;
 }
 
@@ -208,7 +213,12 @@ void FTElectrodeArrayView::stopAnimation()
 
 bool FTElectrodeArrayView::isAnimating()
 {
-	return ((d->m_animate_timepoint>=0)&&(!d->m_animation_paused));
+    return ((d->m_animate_timepoint>=0)&&(!d->m_animation_paused));
+}
+
+void FTElectrodeArrayView::setAnimationSpeed(float hz)
+{
+    d->m_animation_speed=hz;
 }
 
 void FTElectrodeArrayView::setShowChannelNumbers(bool val)
@@ -368,21 +378,29 @@ void FTElectrodeArrayView::mousePressEvent(QMouseEvent *evt)
 void FTElectrodeArrayView::slot_timer()
 {
 	int T=d->m_waveform.N2();
-	int msec=400;
+    int msec=1000;
 	if ((d->m_animate_timepoint>=0)&&(!d->m_animation_paused)) {
+        int msec_incr=(int)(1/d->m_animation_speed*1000);
+        int elapsed=d->m_time_of_last_animation.msecsTo(QDateTime::currentDateTime());
+        while ((elapsed>=msec_incr)&&(msec_incr>0)) {
+            elapsed-=msec_incr;
+            d->m_animate_timepoint++;
+            d->m_time_of_last_animation=QDateTime::currentDateTime();
+        }
 		if (d->m_timepoint!=d->m_animate_timepoint) {
 			d->m_timepoint=d->m_animate_timepoint;
 			emit signalTimepointChanged();
 		}
-		d->m_animate_timepoint++;
+        msec=msec_incr-elapsed+1;
 		if (d->m_animate_timepoint>=T) {
 			d->m_animate_timepoint=-1;
 			d->m_timepoint=-1;
 			emit signalTimepointChanged();
 		}
 		this->update(); this->repaint();
-		msec=20;
+
 	}
+    else msec=400;
 	QTimer::singleShot(msec,this,SLOT(slot_timer()));
 }
 

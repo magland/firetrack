@@ -26,6 +26,7 @@ public:
 	void pauseAnimation();
 	void stopAnimation();
 	bool isAnimating();
+    void setAnimationSpeed(float hz);
 
 	void setShowChannelNumbers(bool val);
 	void setAutoSelectChannels(bool val);
