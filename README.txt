@@ -1,3 +1,8 @@
+== FIRETRACK ==
+
+Copyright (C) 2015 Jeremy Magland, Simons Center for Data Analysis (SCDA)
+Released under GPL: license.txt
+
 == How to compile and run the demo on a Unix system ==
 
 Prequisite
