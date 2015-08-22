@@ -16,6 +16,8 @@ Run from a console:
 > cd ..
 > ./demo1.sh
 
+[[ NOTE: the demos are temporarily disabled for this software ]]
+
 This will download some test data (if needed) and show it.
 
 You can also run "./demo1.sh B" which will run the second demo.
