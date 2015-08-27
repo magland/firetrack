@@ -9,6 +9,7 @@
 #include <QLabel>
 #include "ftoptionswidget.h"
 #include "fthelpwidget.h"
+#include <QDebug>
 
 class FTElectrodeArrayWidgetPrivate {
 public:
@@ -102,6 +103,11 @@ void FTElectrodeArrayWidget::setAnimationSpeed(float hz)
     d->m_view->setAnimationSpeed(hz);
 }
 
+void FTElectrodeArrayWidget::setLoopAnimation(bool val)
+{
+    d->m_view->setLoopAnimation(val);
+}
+
 int FTElectrodeArrayWidget::timepoint()
 {
 	return d->m_view->timepoint();
@@ -175,7 +181,7 @@ void FTElectrodeArrayWidget::slot_timepoint_changed()
 void FTElectrodeArrayWidget::slot_slider_moved()
 {
 	d->m_view->setTimepoint(d->m_slider->value());
-	d->m_view->pauseAnimation();
+    d->m_view->pauseAnimation();
 	d->update_animate_button();
 }
 

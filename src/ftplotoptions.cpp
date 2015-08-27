@@ -11,6 +11,7 @@ public:
 	FTPlotOptions *q;
 	QCheckBox *m_uniform_vertical_spacing;
     QSpinBox *m_animation_speed;
+    QCheckBox *m_loop_animation;
 };
 
 
@@ -57,6 +58,13 @@ FTPlotOptions::FTPlotOptions(QWidget *parent) : QWidget(parent)
         d->m_animation_speed=SB;
         row++;
     }
+    {
+        QCheckBox *CB=new QCheckBox("Loop animation"); CB->setChecked(true);
+        layout->addWidget(CB,row,0);
+        connect(CB,SIGNAL(stateChanged(int)),this,SIGNAL(signalOptionsChanged()));
+        d->m_loop_animation=CB;
+        row++;
+    }
 
 	QSpacerItem *SI=new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 	layout->addItem(SI,row,0);
@@ -86,5 +94,10 @@ bool FTPlotOptions::uniformVerticalChannelSpacing()
 float FTPlotOptions::animationSpeed()
 {
     return d->m_animation_speed->value();
+}
+
+bool FTPlotOptions::loopAnimation()
+{
+    return d->m_loop_animation->isChecked();
 }
 

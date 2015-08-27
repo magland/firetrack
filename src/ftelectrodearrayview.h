@@ -23,6 +23,7 @@ public:
 	void setTimepoint(int val);
 
 	void animate();
+    void setLoopAnimation(bool val);
 	void pauseAnimation();
 	void stopAnimation();
 	bool isAnimating();

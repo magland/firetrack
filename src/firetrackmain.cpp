@@ -20,8 +20,6 @@
 bool download_file(QString url,QString fname) {
 	QStringList args; args << "-o" << fname << url;
 	int ret=QProcess::execute("/usr/bin/curl",args);
-	qDebug() << args;
-	qDebug() << "return value" << ret;
 	if (ret!=0) {
 		if (QFile::exists(fname)) {
 			QFile::remove(fname);
@@ -110,7 +108,6 @@ int main(int argc, char *argv[]) {
 		if (locations_path.isEmpty()) {
 			locations_path=a.applicationDirPath()+"/../testdata/locations.mda";
 		}
-		qDebug() << waveforms_path << locations_path;
 		script="";
 		script+=QString("var V%1=FIRETRACK.createFireTrackWidget();\n").arg(0);
 		script+=QString("var X%1=FIRETRACK.readArray('%2');\n").arg(0).arg(waveforms_path);

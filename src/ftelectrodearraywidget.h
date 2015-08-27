@@ -21,6 +21,7 @@ public:
 
 	void animate();
     void setAnimationSpeed(float hz);
+    void setLoopAnimation(bool val);
 
 	int timepoint();
 	void setTimepoint(int t);

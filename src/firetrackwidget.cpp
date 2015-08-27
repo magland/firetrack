@@ -128,7 +128,6 @@ void FireTrackWidget::setWaveforms(const Mda &X)
 
 void FireTrackWidget::setWaveforms(DiskReadMda *X)
 {
-	qDebug() << "setWaveforms" << X->N1() << X->N2() << X->N3();
 	Mda Y; Y.allocate(X->N1(),X->N2(),X->N3());
 	for (int z=0; z<X->N3(); z++)
 		for (int y=0; y<X->N2(); y++)
@@ -140,7 +139,6 @@ void FireTrackWidget::setWaveforms(DiskReadMda *X)
 
 void FireTrackWidget::setElectrodeLocations(DiskReadMda *X)
 {
-	qDebug() << "setElectrodeLocations" << X->N1() << X->N2();
 	Mda Y; Y.allocate(X->N1(),X->N2());
 	for (int y=0; y<X->N2(); y++)
 		for (int x=0; x<X->N1(); x++) {
@@ -249,6 +247,7 @@ void FireTrackWidget::slot_plot_options_changed()
 {
 	d->m_plot->setUniformVerticalChannelSpacing(d->m_plot_options->uniformVerticalChannelSpacing());
     d->m_widget->setAnimationSpeed(d->m_plot_options->animationSpeed());
+    d->m_widget->setLoopAnimation(d->m_plot_options->loopAnimation());
 }
 
 void FireTrackWidget::slot_plot_vertical_scaling(float val)

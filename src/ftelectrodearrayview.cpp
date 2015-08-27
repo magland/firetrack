@@ -33,6 +33,7 @@ public:
 	float m_brightness;
     float m_animation_speed;
     QDateTime m_time_of_last_animation;
+    bool m_loop_animation;
 
 	QPointF ind2pix(int i);
 	QColor fire_color_map(float pct);
@@ -68,6 +69,7 @@ FTElectrodeArrayView::FTElectrodeArrayView(QWidget *parent) : QWidget(parent)
 	d->m_brightness=0;
 
     d->m_animation_speed=4;
+    d->m_loop_animation=true;
 
 	QPalette pal=this->palette();
 	int tmp=(int)(255*0.8);
@@ -186,6 +188,7 @@ int FTElectrodeArrayView::timepoint()
 
 void FTElectrodeArrayView::setTimepoint(int val)
 {
+    d->m_animate_timepoint=val;
 	if (d->m_timepoint!=val) {
 		d->m_timepoint=val;
 		update(); repaint();
@@ -197,7 +200,12 @@ void FTElectrodeArrayView::animate()
 {
 	d->m_animation_paused=false;
     d->m_time_of_last_animation=QDateTime::currentDateTime();
-	if (d->m_animate_timepoint<0) d->m_animate_timepoint=0;
+    if (d->m_animate_timepoint<0) d->m_animate_timepoint=0;
+}
+
+void FTElectrodeArrayView::setLoopAnimation(bool val)
+{
+    d->m_loop_animation=val;
 }
 
 void FTElectrodeArrayView::pauseAnimation()
@@ -393,6 +401,9 @@ void FTElectrodeArrayView::slot_timer()
 		}
         msec=msec_incr-elapsed+1;
         if (msec<=0) msec=1;
+        if (d->m_loop_animation) {
+            if (d->m_animate_timepoint>=T) d->m_animate_timepoint=0;
+        }
         if ((d->m_animate_timepoint>=T)||(msec_incr==0)) {
 			d->m_animate_timepoint=-1;
 			d->m_timepoint=-1;

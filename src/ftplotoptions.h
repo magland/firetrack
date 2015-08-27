@@ -15,6 +15,7 @@ public:
 
 	bool uniformVerticalChannelSpacing();
     float animationSpeed();
+    bool loopAnimation();
 
 private:
 	FTPlotOptionsPrivate *d;

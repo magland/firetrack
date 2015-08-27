@@ -175,7 +175,6 @@ void SSTimeSeriesPlot::setChannelLabels(const QStringList &labels)
 
 void SSTimeSeriesPlot::setUniformVerticalChannelSpacing(bool val)
 {
-	qDebug() << "setUniformVerticalChannelSpacing" << val;
 	d->m_uniform_vertical_channel_spacing=val;
 	this->slot_replot_needed();
 }
