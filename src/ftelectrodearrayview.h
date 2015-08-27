@@ -43,6 +43,7 @@ signals:
 	void signalTimepointChanged();
 	void signalSelectedElectrodesChanged();
 	void signalElectrodeLeftClicked(int);
+    void signalLoop();
 
 protected:
 	virtual void paintEvent(QPaintEvent *evt);

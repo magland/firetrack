@@ -40,6 +40,7 @@ FireTrackWidget::FireTrackWidget(QWidget *parent) : QMainWindow(parent)
 	connect(d->m_widget,SIGNAL(signalSelectedElectrodesChanged()),this,SLOT(slot_selected_electrodes_changed()));
 	connect(d->m_widget,SIGNAL(signalTimepointChanged()),this,SLOT(slot_timepoint_changed()));
 	connect(d->m_widget,SIGNAL(signalElectrodeLeftClicked(int)),this,SLOT(slot_electrode_left_clicked(int)));
+    connect(d->m_widget,SIGNAL(signalLoop()),this,SLOT(slot_loop()));
 
 
 	d->m_waveform_list=new QListWidget; d->m_waveform_list->setFixedWidth(120);
@@ -252,7 +253,15 @@ void FireTrackWidget::slot_plot_options_changed()
 
 void FireTrackWidget::slot_plot_vertical_scaling(float val)
 {
-	d->m_plot->setVerticalZoomFactor(d->m_plot->verticalZoomFactor()*val);
+    d->m_plot->setVerticalZoomFactor(d->m_plot->verticalZoomFactor()*val);
+}
+
+void FireTrackWidget::slot_loop()
+{
+    int ind=d->m_current_waveform_index+1;
+    if (ind>=d->m_waveforms.N3()) ind=0;
+    d->set_current_waveform_index(ind);
+
 }
 
 FireTrackWidget::~FireTrackWidget()

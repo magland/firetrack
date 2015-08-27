@@ -39,6 +39,7 @@ signals:
 	void signalSelectedElectrodesChanged();
 	void signalTimepointChanged();
 	void signalElectrodeLeftClicked(int);
+    void signalLoop();
 
 private slots:
 	void slot_animate();

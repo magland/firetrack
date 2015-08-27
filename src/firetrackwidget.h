@@ -32,6 +32,7 @@ private slots:
 	void slot_electrode_left_clicked(int ind);
 	void slot_plot_options_changed();
 	void slot_plot_vertical_scaling(float val);
+    void slot_loop();
 
 private:
 	FireTrackWidgetPrivate *d;

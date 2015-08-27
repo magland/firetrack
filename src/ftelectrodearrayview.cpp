@@ -402,7 +402,10 @@ void FTElectrodeArrayView::slot_timer()
         msec=msec_incr-elapsed+1;
         if (msec<=0) msec=1;
         if (d->m_loop_animation) {
-            if (d->m_animate_timepoint>=T) d->m_animate_timepoint=0;
+            if (d->m_animate_timepoint>=T) {
+                d->m_animate_timepoint=0;
+                emit signalLoop();
+            }
         }
         if ((d->m_animate_timepoint>=T)||(msec_incr==0)) {
 			d->m_animate_timepoint=-1;
