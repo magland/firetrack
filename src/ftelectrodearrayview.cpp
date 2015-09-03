@@ -404,7 +404,7 @@ void FTElectrodeArrayView::slot_timer()
         if (d->m_loop_animation) {
             if (d->m_animate_timepoint>=T) {
                 d->m_animate_timepoint=0;
-                emit signalLoop();
+                //emit signalLoop(); don't do this for now
             }
         }
         if ((d->m_animate_timepoint>=T)||(msec_incr==0)) {
