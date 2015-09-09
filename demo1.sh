@@ -13,12 +13,12 @@ function main_function {
 function do_run_firetrack {
     fname=$1
     echo "Loading $fname..."
-    if [ ! -f testdata/$fname ]; then
+    if [ ! -f testdata/$fname ] || [ $(wc -c <"$file") lt 1000000 ] ; then
         read -p "We will need to download some data. Proceed? (y/n): " yn
         case $yn in
             [Yy]* )
-   		read -p "Please enter the passcode: " passcode
-		do_download $fname $passcode;;
+   		#read -p "Please enter the passcode: " passcode
+		do_download $fname;;
             [Nn]* ) exit;;
             * ) echo "Please answer yes or no next time!"; exit;;
         esac
@@ -46,8 +46,8 @@ function check_compiled {
 
 function do_download {
     fname=$1
-    passcode=$2
-    curl -f http://97.107.129.125/$passcode/$fname -o testdata/$fname
+    #passcode=$2
+    curl -f http://97.107.129.125/$fname -o testdata/$fname
 }
 
 testmode=$1

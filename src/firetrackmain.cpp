@@ -4,6 +4,7 @@
 #include <qdatetime.h>
 #include "ftcontroller.h"
 #include <QFile>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QProcess>
 #include <QStringList>
@@ -88,9 +89,8 @@ int main(int argc, char *argv[]) {
 		script=read_text_file(script_path);
 	} else {
 		if (waveforms_path.isEmpty()) {
-
             waveforms_path=a.applicationDirPath()+"/../testdata/waveforms_first_5e5_points.mda";
-			if (!QFile::exists(waveforms_path)) {
+            if ((!QFile::exists(waveforms_path))||(QFileInfo(waveforms_path).size()<1e6)) {
 				QMessageBox::StandardButton reply=
 				QMessageBox::question(0,"Start download?","Test data must be downloaded. Start download?",QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
 				if (reply==QMessageBox::No) exit(0);
@@ -116,6 +116,7 @@ int main(int argc, char *argv[]) {
 		script+=QString("V%1.setElectrodeLocations(L%1);\n").arg(0);
 		//script+=QString("V%1.setTitle(\"This is a test %1.\");\n").arg(0);
 		script+=QString("V%1.show();\n").arg(0);
+        script+=QString("V%1.animate();\n").arg(0);
 		script+="\n";
 	}
 

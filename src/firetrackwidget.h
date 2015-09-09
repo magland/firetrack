@@ -18,6 +18,7 @@ public:
 	void setElectrodeLocations(const Mda &L);
 	void setWaveforms(const Mda &X);
 
+    Q_INVOKABLE void animate();
 	Q_INVOKABLE void setWaveforms(DiskReadMda *X);
 	Q_INVOKABLE void setElectrodeLocations(DiskReadMda *X);
 

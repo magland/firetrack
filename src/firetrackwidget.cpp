@@ -124,7 +124,12 @@ void FireTrackWidget::setWaveforms(const Mda &X)
 			}
 	d->m_widget->setGlobalAbsMax(absmax);
 
-	d->set_current_waveform_index(0);
+    d->set_current_waveform_index(0);
+}
+
+void FireTrackWidget::animate()
+{
+    d->m_widget->animate();
 }
 
 void FireTrackWidget::setWaveforms(DiskReadMda *X)
