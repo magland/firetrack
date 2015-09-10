@@ -2,12 +2,12 @@
 
 ### How to compile and run the demo on a Unix system
 
-*Prequisite:*
+**Prequisite:**
 
 First, you need to have Qt4 or Qt5 development environment installed.
 See: http://doc.qt.io/qt-5/gettingstarted.html
 
-*Run from a console:*
+**Run from a console:**
 ```bash
 > cd src
 > qmake
